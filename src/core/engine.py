@@ -1,6 +1,7 @@
 import os
 import ee
 import json
+import geemap
 from datetime import datetime
 from config import config
 
@@ -31,7 +32,7 @@ class GEEEngine:
         Mengekspor objek ee.Geometry dari server GEE menjadi berkas GeoJSON lokal
         agar dapat langsung dimuat ke dalam QGIS / ArcGIS.
         """
-        print(f"[~] Fetching ROI geometry coordinates from Earth Engine server...")
+        print("[~] Fetching ROI geometry coordinates from Earth Engine server...")
 
         # Mengambil informasi spasial geometri dari server GEE ke lokal Python
         roi_info = roi.getInfo()
@@ -63,6 +64,59 @@ class GEEEngine:
 
         print(f"[✓] Geometri ROI berhasil diekspor untuk QGIS di: {geojson_path}")
         return geojson_path
+
+    def visualize_on_map(self, roi, p1, p2, p3, p4):
+        print("[~] Generating Interactive Map with geemap...")
+
+        # Inisialisasi peta interaktif di tengah ROI
+        Map = geemap.Map()
+        Map.centerObject(roi, 12)
+
+        # 1. Visualisasi Degradasi Hutan (P1 - d_NDVI_degradation)
+        # Nilai negatif berarti vegetasi memburuk (degradasi)
+        ndvi_vis = {"min": -0.5, "max": 0, "palette": ["red", "yellow", "green"]}
+        Map.addLayer(
+            p1.select("d_NDVI_degradation"),
+            ndvi_vis,
+            "P1: Pre-Event NDVI Degradation",
+        )
+
+        # 2. Visualisasi Lonjakan Runoff (P2 - runoff_net_increase)
+        runoff_vis = {"min": 0, "max": 100, "palette": ["white", "blue", "darkblue"]}
+        Map.addLayer(
+            p2.select("runoff_net_increase"), runoff_vis, "P2: Runoff Net Increase"
+        )
+
+        # 3. Visualisasi Zona Kritis Hulu (P3 - critical_upstream_deforestation)
+        # Karena biner, kita beri warna merah solid untuk area yang aktif
+        Map.addLayer(
+            p3.select("critical_upstream_deforestation"),
+            {"palette": ["purple"]},
+            "P3: Critical Deforestation (>15 Deg)",
+        )
+
+        # 4. Visualisasi Model Kausal (P4 - gabungan multi-band)
+        # Menampilkan visualisasi RGB False Color dari hubungan sebab-akibat
+        # Red = Degradasi hulu, Green = Lonjakan runoff, Blue = Kerusakan hilir
+        causal_vis = {
+            "bands": [
+                "cause_degradation",
+                "effect_runoff_spike",
+                "effect_post_destruction",
+            ],
+            "min": -0.5,
+            "max": 0.5,
+        }
+        Map.addLayer(p4, causal_vis, "P4: Spatial Causal Composite (RGB)")
+
+        # Tambahkan batas ROI sebagai garis merah
+        Map.addLayer(
+            roi, {"color": "red", "fillColor": "00000000"}, "Watershed Boundary (ROI)"
+        )
+
+        # Tampilkan peta (jika di Jupyter) atau simpan sebagai HTML interaktif
+        Map.save("data/output_metrics/forensic_map.html")
+        print("[✓] Interactive map saved to data/output_metrics/forensic_map.html")
 
     def safe_extract_metric(self, stats_dict: dict, key: str) -> float or None:
         """

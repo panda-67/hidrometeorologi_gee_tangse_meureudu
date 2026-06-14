@@ -29,19 +29,24 @@ geo_forensic_corridor/
 ├── src/
 │   ├── core/
 │   │   ├── engine.py          # Manajemen otentikasi GEE, ROI, & utilitas ekstraksi ketat
-│   │   └── hydrology.py       # Pemodelan hidrologi SCS-CN dengan input CHIRPS dinamis
+│   │   ├── hydrology.py       # Pemodelan hidrologi SCS-CN dengan input CHIRPS dinamis
+│   │   ├── landcover.py
+│   │   ├── terrain.py
+│   │   └── vegatation.py
 │   └── pipelines/
 │       ├── p1_gajah_satellite.py
 │       ├── p2_gajah_hydrology.py
-│       └── p3_meureudu_upstream.py
+│       ├── p3_meureudu_upstream.py
+│       └── p4_causal_modeling.py
 ├── config.py                  # Konfigurasi terpusat parameter tanggal & batas watershed
+├── environment.yml
 ├── main.py                    # Script eksekusi utama, data parsing, & guardrail logika
 └── README.md
 ```
 
 ## 🛠️ Langkah Instalasasi & Penggunaan
 
-1. Kebutuhan Lingkungan Sistem
+### Kebutuhan Lingkungan Sistem
 
 Aplikasi ini dikembangkan dan dioptimalkan di atas sistem operasi Arch Linux / CachyOS menggunakan package manager lingkungan Mamba / Conda. 2. Setup Environment
 
@@ -50,16 +55,16 @@ Bash
 
 ```{bash}
 
-git clone [https://github.com/username/geo_forensic_corridor.git](https://github.com/username/geo_forensic_corridor.git)
+git clone [https://github.com/panda-67/hidrometeorologi_gee_tangse_meureudu](https://github.com/panda-67/hidrometeorologi_gee_tangse_meureudu)
 cd geo_forensic_corridor
 
-# Membuat environment via mamba
-mamba create -n geo-forensic python=3.10 earthengine-api pandas-core -c conda-forge
-mamba activate geo-forensic
+# Membuat environment via micromamba
+micromamba create -n geo-forensic python=3.10 earthengine-api pandas-core -c conda-forge
+micromamba activate geo-forensic
 
 ```
 
-1. Otentikasi Google Earth Engine
+### Otentikasi Google Earth Engine
 
 Sebelum menjalankan skrip untuk pertama kali, pastikan Anda telah mengaktifkan akses API kunci Google Earth Engine ke sistem lokal Anda:
 
@@ -67,7 +72,7 @@ Sebelum menjalankan skrip untuk pertama kali, pastikan Anda telah mengaktifkan a
 earthengine authenticate
 ```
 
-1. Eksekusi Program
+### Eksekusi Program
 
 Jalankan pipa pemrosesan utama untuk memicu kalkulasi server GEE, pembuatan laporan JSON, dan ekspor geometri spasial:
 Bash

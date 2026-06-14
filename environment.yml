@@ -4,6 +4,7 @@ channels:
 dependencies:
   - python=3.11
   - earthengine-api
+  - geemap
   - google-api-python-client
   - pycryptodome
   - requests

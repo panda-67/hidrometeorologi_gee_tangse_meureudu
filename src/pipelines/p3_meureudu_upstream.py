@@ -11,9 +11,10 @@ class MeureuduUpstreamPipeline:
         self.lca = LandCoverAnalyzer(roi)
 
     def execute(self) -> ee.Image:
-        # 1. Hitung Parameter Morfometri Lereng Hulu
+        # 1. Hitung Parameter Morfometri Lereng Hulu menggunakan TerrainAnalyzer terbaru
         terrain_layers = self.ta.analyze_morfometry()
-        slope = terrain_layers.select("slope")
+        # Mengambil band "Slope" (Kapital sesuai dengan output dari class TerrainAnalyzer terbaru)
+        slope = terrain_layers.select("Slope")
 
         # 2. Ambil Data Tutupan Lahan Mentah dan Ubah Menjadi Mask Hutan
         lc_2020_raw = self.lca.get_worldcover_2020()
@@ -35,4 +36,5 @@ class MeureuduUpstreamPipeline:
             "critical_upstream_deforestation"
         )
 
+        # Mengembalikan gabungan multi-band: ["elevation", "Slope", "forest_loss_preevent", "critical_upstream_deforestation"]
         return ee.Image.cat([terrain_layers, loss_preevent, critical_clipping])

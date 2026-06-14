@@ -28,38 +28,6 @@ class HydrologyModeler:
         }
 
     # =========================================================================
-    # TERRAIN COMPONENT (Copernicus DEM GLO-30 & Morfometri)
-    # =========================================================================
-
-    def get_dem(self) -> ee.Image:
-        """COPERNICUS DEM GLO-30."""
-        return (
-            ee.ImageCollection("COPERNICUS/DEM/GLO30")
-            .select("DEM")
-            .mosaic()
-            .clip(self.roi)
-        )
-
-    def get_elevation(self) -> ee.Image:
-        """Alias DEM."""
-        return self.get_dem()
-
-    def get_slope(self) -> ee.Image:
-        """Slope dalam satuan derajat."""
-        dem = self.get_dem()
-        return ee.Terrain.slope(dem).rename("Slope")
-
-    def get_aspect(self) -> ee.Image:
-        """Aspect lereng."""
-        dem = self.get_dem()
-        return ee.Terrain.aspect(dem).rename("Aspect")
-
-    def get_hillshade(self) -> ee.Image:
-        """Hillshade visualisasi."""
-        dem = self.get_dem()
-        return ee.Terrain.hillshade(dem).rename("Hillshade")
-
-    # =========================================================================
     # SCS-CN COMPONENT (Curve Number Spasial)
     # =========================================================================
 
@@ -109,12 +77,16 @@ class HydrologyModeler:
     ) -> ee.Image:
         """
         SCS-CN Runoff Model dengan Input Curah Hujan Dinamis (ee.Image).
+
+        SCS-CN Runoff Model.
+        Rumus: Q = (P - Ia)^2 / (P + 0.8S) jika P > Ia, else Q = 0
         """
+
         # BARIS DIUBAH: Tidak lagi menggunakan ee.Image.constant dari config
         s = self.potential_retention(cn_image)
         ia = s.multiply(0.2)
 
-        # Rumus utama TR-55
+        # Rumus pembagi TR-55: P - Ia + S = P - 0.2S + S = P + 0.8S
         numerator = rainfall_image.subtract(ia).pow(2)
         denominator = rainfall_image.add(s.multiply(0.8))
         runoff = numerator.divide(denominator)
@@ -122,24 +94,6 @@ class HydrologyModeler:
         # Kondisi batas hidrologi: Jika P <= Ia, runoff = 0
         final_runoff = runoff.where(rainfall_image.lte(ia), 0)
         return final_runoff.rename("Q_runoff")
-
-    # def calculate_runoff(self, cn_image: ee.Image) -> ee.Image:
-    #     """
-    #     SCS-CN Runoff Model.
-    #     Rumus: Q = (P - Ia)^2 / (P + 0.8S) jika P > Ia, else Q = 0
-    #     """
-    #     rainfall_image = ee.Image.constant(self.rainfall_mm).clip(self.roi)
-    #     s = self.potential_retention(cn_image)
-    #     ia = s.multiply(0.2)
-    #
-    #     # Rumus pembagi TR-55: P - Ia + S = P - 0.2S + S = P + 0.8S
-    #     numerator = rainfall_image.subtract(ia).pow(2)
-    #     denominator = rainfall_image.add(s.multiply(0.8))
-    #     runoff = numerator.divide(denominator)
-    #
-    #     # Kondisi batas hidrologi: Jika P <= Ia, limpasan air permukaan adalah 0
-    #     final_runoff = runoff.where(rainfall_image.lte(ia), 0)
-    #     return final_runoff.rename("Runoff_mm")
 
     def runoff_difference(
         self, runoff_before: ee.Image, runoff_after: ee.Image
