@@ -26,7 +26,7 @@ class GajahHydrologyPipeline:
         # 3. Bangun peta biner forest loss
         forest_2020 = self.lca.get_forest_mask(lc_2020_raw, source="worldcover")
         forest_2025 = self.lca.get_forest_mask(lc_2025_raw, source="dynamic_world")
-        loss_preevent = forest_2020.subtract(forest_2025).eq(1)
+        loss_preevent = self.lca.get_forest_loss_mask(forest_2020, forest_2025)
 
         # 4. Bangun Matriks Curve Number (CN)
         cn_baseline = self.hm.worldcover_to_cn(lc_2020_raw)

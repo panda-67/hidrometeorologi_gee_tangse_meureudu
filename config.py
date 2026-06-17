@@ -1,4 +1,3 @@
-import os
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import List, Tuple
 
@@ -20,7 +19,7 @@ class GEEConfig(BaseSettings):
     F_BASELINE_END: str = "2020-12-31"
 
     # 2. Pre-Event Fase (Akumulasi Degradasi Lahan)
-    F_PRE_EVENT_START: str = "2025-01-01"
+    F_PRE_EVENT_START: str = "2025-09-01"
     F_PRE_EVENT_END: str = "2025-11-23"
 
     # 3. Flood Event Fase (Puncak Hujan & Simulasi Limpasan)
@@ -29,7 +28,7 @@ class GEEConfig(BaseSettings):
 
     # 4. Post-Event Fase (Genangan Hilir & Sedimen)
     F_POST_EVENT_START: str = "2025-12-01"
-    F_POST_EVENT_END: str = "2026-01-31"
+    F_POST_EVENT_END: str = "2025-12-31"
 
     # Ambang Batas Saintifik (Thresholds)
     CLOUD_PROB_THRESHOLD: int = 20

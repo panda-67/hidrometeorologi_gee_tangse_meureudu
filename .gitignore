@@ -54,6 +54,7 @@ data/04_outputs/*
 *.tif
 *.tiff
 *.img
+*.html
 *.vrt
 *.shp
 *.shx

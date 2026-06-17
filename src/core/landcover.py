@@ -49,6 +49,17 @@ class LandCoverAnalyzer:
         """Menghasilkan mask area bukan hutan biner."""
         return self.get_forest_mask(image, source).Not().rename("non_forest_mask")
 
+    def get_forest_loss_mask(
+        self, forest_mask_before: ee.Image, forest_mask_after: ee.Image
+    ) -> ee.Image:
+        """
+        Mask biner kehilangan hutan (1 = ada hutan di citra 'before' DAN
+        sudah tidak ada hutan lagi di citra 'after').
+        """
+        return forest_mask_before.And(forest_mask_after.Not()).rename(
+            "forest_loss_mask"
+        )
+
     def area_image(self, mask: ee.Image) -> ee.Image:
         """
         Helper spasial untuk mengubah mask biner (0 atau 1) menjadi

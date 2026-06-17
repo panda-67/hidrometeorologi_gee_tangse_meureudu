@@ -1,7 +1,8 @@
 import os
 import ee
-import json
 import geemap
+import json
+from typing import Optional
 from datetime import datetime
 from config import config
 
@@ -118,14 +119,21 @@ class GEEEngine:
         Map.save("data/output_metrics/forensic_map.html")
         print("[✓] Interactive map saved to data/output_metrics/forensic_map.html")
 
-    def safe_extract_metric(self, stats_dict: dict, key: str) -> float or None:
+    def safe_extract_metric(self, stats_dict: dict, key: str) -> Optional[float]:
         """
         Mengekstrak nilai GEE reducer secara ketat berdasarkan pencarian kata kunci band.
         Mengembalikan None jika data tidak ditemukan agar tidak memalsukan laporan forensik.
+
+        PERBAIKAN: pencocokan sebelumnya menggunakan `key in k` (substring match
+        di mana saja dalam string), yang berisiko false-positive bila satu nama
+        band kebetulan menjadi substring dari nama band lain (mis. "NDVI_mean"
+        vs "NDVI_preevent_mean"). Sekarang dicocokkan pada akhiran kunci dengan
+        pembatas underscore eksplisit ("_" + key atau persis sama dengan key),
+        sesuai pola kunci hasil reduceRegion yaitu "{band}_{reducer}".
         """
         if not stats_dict:
             return None
         for k, v in stats_dict.items():
-            if key in k:
+            if k == key or k.endswith("_" + key):
                 return v
         return None
