@@ -21,7 +21,7 @@ class GajahHydrologyPipeline:
         # Sesuaikan tanggal ini dengan kejadian banjir aktual November 2025
         flood_rainfall_img = self.hm.get_dynamic_peak_rainfall(
             config.F_FLOOD_EVENT_START, config.F_FLOOD_EVENT_END
-        )
+        ).rename("dynamic_rainfall_peak")
 
         # 3. Bangun peta biner forest loss
         forest_2020 = self.lca.get_forest_mask(lc_2020_raw, source="worldcover")
@@ -44,14 +44,16 @@ class GajahHydrologyPipeline:
         ).rename("Q_actual_floodevent")
 
         # 6. Hitung Perubahan Limpasan Bersih
-        delta_runoff = self.hm.runoff_difference(runoff_baseline, runoff_flood_event)
+        delta_runoff = self.hm.runoff_difference(
+            runoff_baseline, runoff_flood_event
+        ).rename("runoff_net_increase")
 
         # Serta ikut sertakan layer curah hujan dinamis ke dalam hasil untuk dibaca main.py
         return ee.Image.cat(
             [
+                flood_rainfall_img,
                 runoff_baseline,
                 runoff_flood_event,
-                delta_runoff.rename("runoff_net_increase"),
-                flood_rainfall_img.rename("dynamic_rainfall_peak"),  # Tambah band baru
+                delta_runoff,
             ]
         )

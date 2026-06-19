@@ -56,11 +56,11 @@ Bash
 ```{bash}
 
 git clone [https://github.com/panda-67/hidrometeorologi_gee_tangse_meureudu](https://github.com/panda-67/hidrometeorologi_gee_tangse_meureudu)
-cd geo_forensic_corridor
+cd hidrometeorologi_gee_tangse_meureudu
 
 # Membuat environment via micromamba
-micromamba create -n geo-forensic python=3.10 earthengine-api pandas-core -c conda-forge
-micromamba activate geo-forensic
+micromamba create -f environment.yml
+micromamba activate geo-forensic-env
 
 ```
 

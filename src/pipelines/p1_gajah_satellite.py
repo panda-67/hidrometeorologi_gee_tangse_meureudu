@@ -11,11 +11,11 @@ class GajahSatellitePipeline:
 
     def execute(self) -> ee.Image:
         # Menghitung rentang waktu nyata dari akhir baseline 2020 ke akhir pre-event 2025
-        date_baseline_end = datetime.strptime(config.F_BASELINE_END, "%Y-%m-%d")
-        date_pre_event_end = datetime.strptime(config.F_PRE_EVENT_END, "%Y-%m-%d")
+        date_baseline_start = datetime.strptime(config.F_BASELINE_START, "%Y-%m-%d")
+        date_post_event_end = datetime.strptime(config.F_POST_EVENT_END, "%Y-%m-%d")
 
         # Selisih hari dibagi rata-rata jumlah hari dalam setahun (termasuk kabisat)
-        delta_days = (date_pre_event_end - date_baseline_end).days
+        delta_days = (date_post_event_end - date_baseline_start).days
 
         calculated_timeline_years = (
             delta_days / 365.25

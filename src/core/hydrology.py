@@ -5,7 +5,8 @@ from config import config
 class HydrologyModeler:
     """
     Menangani analisis medan topografi dan pemodelan hidrologi empiris SCS-CN
-    untuk estimasi limpasan permukaan (surface runoff) makro regional.
+    (Soil Conservation Service - Curve Number) untuk estimasi limpasan
+    permukaan (surface runoff) makro regional.
     """
 
     def __init__(self, roi: ee.Geometry):
@@ -78,8 +79,15 @@ class HydrologyModeler:
         """
         SCS-CN Runoff Model dengan Input Curah Hujan Dinamis (ee.Image).
 
+            Q = (P - Ia)² / (P - Ia + S)
+        di mana:
+            S = (25400/CN) - 254      ← nilai S bergantung CN!
+            Ia = 0.2S                 ← initial abstraction
+            P = rainfall
+            Q = runoff
+
         SCS-CN Runoff Model.
-        Rumus: Q = (P - Ia)^2 / (P + 0.8S) jika P > Ia, else Q = 0
+        Rumus: Q = (P - Ia)² / (P + 0.8S) jika P > Ia, else Q = 0
         """
 
         # BARIS DIUBAH: Tidak lagi menggunakan ee.Image.constant dari config
